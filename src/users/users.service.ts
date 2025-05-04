@@ -23,8 +23,8 @@ export class UsersService {
         return createdUser.save();
     }
 
-    async findAll(): Promise<UserDocument[]> {
-        return this.userModel.find({}).select('-password').exec();
+    async findAll(userId: string): Promise<UserDocument[]> {
+        return (await this.userModel.find({}).select('-password').exec()).filter((user) => user.id !== userId);
     }
 
     async findOneByEmail(email: string): Promise<UserDocument | undefined | null> {
