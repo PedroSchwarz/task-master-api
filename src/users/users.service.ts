@@ -9,21 +9,11 @@ import { Model } from 'mongoose';
 export class UsersService {
     constructor(@InjectModel(User.name) private userModel: Model<User>) { }
 
-    async create(registerDto: RegisterDto): Promise<UserDocument> {
-        const hashedPassword = await bcrypt.hash(registerDto.password, 10);
-
-        const user = {
-            firstName: registerDto.firstName,
-            lastName: registerDto.lastName,
-            email: registerDto.email,
-            password: hashedPassword,
-        };
-
-        const createdUser = new this.userModel(user);
-        return createdUser.save();
+    async findAll(): Promise<UserDocument[]> {
+        return this.userModel.find({}).select('-password').exec();
     }
 
-    async findAll(userId: string): Promise<UserDocument[]> {
+    async findAllForUser(userId: string): Promise<UserDocument[]> {
         return (await this.userModel.find({}).select('-password').exec()).filter((user) => user.id !== userId);
     }
 
@@ -39,5 +29,27 @@ export class UsersService {
         }
 
         return foundUser;
+    }
+
+    async create(registerDto: RegisterDto): Promise<UserDocument> {
+        const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+
+        const user = {
+            firstName: registerDto.firstName,
+            lastName: registerDto.lastName,
+            email: registerDto.email,
+            password: hashedPassword,
+        };
+
+        const createdUser = new this.userModel(user);
+        return createdUser.save();
+    }
+
+    async delete(id: string): Promise<void> {
+        await this.userModel.findByIdAndDelete(id).exec();
+    }
+
+    async deleteAll(): Promise<void> {
+        await this.userModel.deleteMany({}).exec();
     }
 }

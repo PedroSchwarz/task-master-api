@@ -8,11 +8,15 @@ import CreateGroupDto from './dto/create_group.dto';
 export class GroupsService {
     constructor(@InjectModel(Group.name) private groupModel: Model<Group>) { }
 
-    async getAllForUser(userId: string): Promise<GroupDocument[]> {
-        return this.groupModel.find({ members: userId }).populate('members').exec();
+    async getAll(): Promise<GroupDocument[]> {
+        return this.groupModel.find({}).exec();
     }
 
-    async create(userId: string, createGroupDto: CreateGroupDto): Promise<GroupDocument> {
+    async getAllForUser(userId: string): Promise<GroupDocument[]> {
+        return this.groupModel.find({ members: userId }).populate('members').populate('owner').exec();
+    }
+
+    async create(userId: string, createGroupDto: CreateGroupDto): Promise<string> {
         const group = {
             name: createGroupDto.name,
             description: createGroupDto.description,
@@ -20,7 +24,8 @@ export class GroupsService {
             members: [userId],
         }
         const createdGroup = new this.groupModel(group);
-        return createdGroup.save();
+        await createdGroup.save();
+        return createdGroup.id;
     }
 
     async addUser(groupId: string, userId: string): Promise<void> {
@@ -28,7 +33,11 @@ export class GroupsService {
         return;
     }
 
-    async deleteAll(): Promise<any> {
-        return this.groupModel.deleteMany({}).exec();
+    async delete(id: string): Promise<void> {
+        await this.groupModel.findByIdAndDelete(id).exec();
+    }
+
+    async deleteAll(): Promise<void> {
+        await this.groupModel.deleteMany({}).exec();
     }
 }
