@@ -1,4 +1,4 @@
-import { Controller, Param, Post, UseGuards, Request, Body, Get, Delete } from '@nestjs/common';
+import { Controller, Param, Post, UseGuards, Request, Body, Get, Delete, Put, Query } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import CreateInviteDto from './dto/create_invite.dto';
 import { InvitesService } from './invites.service';
@@ -10,8 +10,8 @@ export class InvitesController {
 
     @UseGuards(AuthGuard)
     @Get()
-    async getAllForUser(@Request() req): Promise<InviteDocument[]> {
-        return this.invitesService.getAllForUser(req.user.sub);
+    async getAllForUser(@Request() req, @Query('status') status?: string): Promise<InviteDocument[]> {
+        return this.invitesService.getAllForUser(req.user.sub, status);
     }
 
     @UseGuards(AuthGuard)
@@ -24,6 +24,18 @@ export class InvitesController {
     @Post()
     async createInvite(@Request() req, @Body() createInviteDto: CreateInviteDto): Promise<void> {
         return this.invitesService.create(req.user.sub, createInviteDto);
+    }
+
+    @UseGuards(AuthGuard)
+    @Put(':id/accept/:groupId')
+    async acceptInvite(@Request() req, @Param('id') inviteId, @Param('groupId') groupId): Promise<void> {
+        return this.invitesService.accept(req.user.sub, inviteId, groupId);
+    }
+
+    @UseGuards(AuthGuard)
+    @Put(':id/reject/:groupId')
+    async rejectInvite(@Param('id') inviteId, @Param('groupId') groupId): Promise<void> {
+        return this.invitesService.reject(inviteId, groupId);
     }
 
     @UseGuards(AuthGuard)

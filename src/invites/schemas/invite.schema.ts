@@ -16,6 +16,9 @@ export class Invite {
     @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'Group' })
     group: Group;
 
+    @Prop({ required: true, default: 'pending' })
+    status: string;
+
     @Prop({ default: Date.now() })
     createdAt: Date;
 }
