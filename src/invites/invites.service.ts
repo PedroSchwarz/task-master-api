@@ -10,15 +10,15 @@ export class InvitesService {
     constructor(@InjectModel(Invite.name) private inviteModel: Model<Invite>, private readonly groupService: GroupsService) { }
 
     async getAll(): Promise<InviteDocument[]> {
-        return this.inviteModel.find({}).populate('to').populate('from').populate('group').exec();
+        return this.inviteModel.find({}).populate(['to', 'from', 'group']).exec();
     }
 
     async getAllForUser(userId: string, status: string = 'all'): Promise<InviteDocument[]> {
         if (status === 'all') {
-            return this.inviteModel.find({ to: userId }).populate('from').populate('group').exec();
+            return this.inviteModel.find({ to: userId }).populate(['from', 'group']).exec();
         }
 
-        return (await this.inviteModel.find({ to: userId }).populate('from').populate('group').exec()).filter(invite => invite.status === status);
+        return (await this.inviteModel.find({ to: userId }).populate(['from', 'group']).exec()).filter(invite => invite.status === status);
     }
 
     async create(userId: string, createInviteDto: CreateInviteDto): Promise<void> {

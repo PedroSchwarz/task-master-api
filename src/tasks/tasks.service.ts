@@ -9,7 +9,7 @@ export class TasksService {
     constructor(@InjectModel(Task.name) private taskModel: Model<Task>) { }
 
     async getAllForGroup(groupId: string): Promise<TaskDocument[]> {
-        return this.taskModel.find({ group: groupId }).exec();
+        return this.taskModel.find({ group: groupId }).populate(['owner', 'assignedTo']).exec();
     }
 
     async create(userId: string, createTaskDto: CreateTaskDto): Promise<void> {

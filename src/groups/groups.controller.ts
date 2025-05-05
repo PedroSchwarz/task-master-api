@@ -21,6 +21,12 @@ export class GroupsController {
     }
 
     @UseGuards(AuthGuard)
+    @Get(':id')
+    async getById(@Param('id') id: string): Promise<GroupDocument> {
+        return this.groupsService.getById(id);
+    }
+
+    @UseGuards(AuthGuard)
     @Post()
     async create(@Request() req, @Body() createGroupDto: CreateGroupDto): Promise<string> {
         return this.groupsService.create(req.user.sub, createGroupDto);
