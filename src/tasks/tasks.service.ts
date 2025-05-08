@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Task, TaskDocument } from './schema/task.schema';
 import { Model } from 'mongoose';
 import CreateTaskDto from './dto/create_task.dto';
+import UpdateTaskDto from './dto/update_task.dto';
 
 @Injectable()
 export class TasksService {
@@ -10,6 +11,16 @@ export class TasksService {
 
     async getAllForGroup(groupId: string): Promise<TaskDocument[]> {
         return this.taskModel.find({ group: groupId }).populate(['owner', 'assignedTo']).exec();
+    }
+
+    async getById(id: string): Promise<TaskDocument> {
+        const task = await this.taskModel.findById(id).exec();
+
+        if (!task) {
+            throw new NotFoundException();
+        }
+
+        return task;
     }
 
     async create(userId: string, createTaskDto: CreateTaskDto): Promise<void> {
@@ -22,9 +33,19 @@ export class TasksService {
             group: createTaskDto.group,
             owner: userId,
             assignedTo: createTaskDto.assignedTo,
-        }
+        };
+
         const createdTask = new this.taskModel(task);
         await createdTask.save();
+    }
+
+    async update(id: string, updateTaskDto: UpdateTaskDto): Promise<void> {
+        const task = {
+            ...updateTaskDto,
+            updatedAt: Date.now()
+        };
+
+        await this.taskModel.findByIdAndUpdate(id, task).exec();
     }
 
     // async addUser(groupId: string, userId: string): Promise<void> {
@@ -32,11 +53,11 @@ export class TasksService {
     //     return;
     // }
 
-    // async delete(id: string): Promise<void> {
-    //     await this.taskModel.findByIdAndDelete(id).exec();
-    // }
+    async delete(id: string): Promise<void> {
+        await this.taskModel.findByIdAndDelete(id).exec();
+    }
 
-    // async deleteAll(): Promise<void> {
-    //     await this.taskModel.deleteMany({}).exec();
-    // }
+    async deleteAll(): Promise<void> {
+        await this.taskModel.deleteMany({}).exec();
+    }
 }
