@@ -5,7 +5,7 @@ import { User } from 'src/users/schemas/user.schema';
 
 export type TaskDocument = HydratedDocument<Task>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Task {
     @Prop({ required: true })
     title: string;
@@ -33,12 +33,6 @@ export class Task {
 
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], default: [] })
     assignedTo: User[];
-
-    @Prop({ default: Date.now() })
-    createdAt: Date;
-
-    @Prop({ default: Date.now() })
-    updatedAt: Date;
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);

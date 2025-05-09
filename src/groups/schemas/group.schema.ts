@@ -4,7 +4,7 @@ import { User } from 'src/users/schemas/user.schema';
 
 export type GroupDocument = HydratedDocument<Group>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Group {
     @Prop({ required: true })
     name: string;
@@ -17,9 +17,6 @@ export class Group {
 
     @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
     owner: User;
-
-    @Prop({ default: Date.now() })
-    createdAt: Date;
 }
 
 export const GroupSchema = SchemaFactory.createForClass(Group);

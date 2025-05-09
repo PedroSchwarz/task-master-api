@@ -40,10 +40,7 @@ export class TasksService {
     }
 
     async update(id: string, updateTaskDto: UpdateTaskDto): Promise<void> {
-        const task = {
-            ...updateTaskDto,
-            updatedAt: Date.now()
-        };
+        const task = { ...updateTaskDto };
 
         await this.taskModel.findByIdAndUpdate(id, task).exec();
     }

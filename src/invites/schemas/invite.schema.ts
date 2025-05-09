@@ -5,7 +5,7 @@ import { User } from 'src/users/schemas/user.schema';
 
 export type InviteDocument = HydratedDocument<Invite>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Invite {
     @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
     from: User;
@@ -18,9 +18,6 @@ export class Invite {
 
     @Prop({ required: true, default: 'pending' })
     status: string;
-
-    @Prop({ default: Date.now() })
-    createdAt: Date;
 }
 
 export const InviteSchema = SchemaFactory.createForClass(Invite);
