@@ -14,7 +14,7 @@ export class TasksService {
     }
 
     async getById(id: string): Promise<TaskDocument> {
-        const task = await this.taskModel.findById(id).exec();
+        const task = await this.taskModel.findById(id).populate(['owner', 'assignedTo']).exec();
 
         if (!task) {
             throw new NotFoundException();

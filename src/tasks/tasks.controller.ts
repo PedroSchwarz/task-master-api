@@ -38,4 +38,10 @@ export class TasksController {
     async deleteTask(@Param('id') id: string): Promise<void> {
         return this.tasksService.delete(id);
     }
+
+    @UseGuards(AuthGuard)
+    @Delete()
+    async deleteAll(): Promise<void> {
+        return this.tasksService.deleteAll();
+    }
 }

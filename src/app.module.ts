@@ -5,8 +5,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { GroupsModule } from './groups/groups.module';
 import { InvitesModule } from './invites/invites.module';
 import { TasksModule } from './tasks/tasks.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, MongooseModule.forRoot('mongodb://admin:secret@localhost:27017/task-master?authSource=admin'), GroupsModule, InvitesModule, TasksModule],
+  imports: [AuthModule, UsersModule, MongooseModule.forRoot('mongodb://admin:secret@localhost:27017/task-master?authSource=admin'), GroupsModule, InvitesModule, TasksModule, CommentsModule],
 })
 export class AppModule { }
