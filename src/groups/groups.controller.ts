@@ -34,6 +34,12 @@ export class GroupsController {
     }
 
     @UseGuards(AuthGuard)
+    @Post(':id/member')
+    async addMember(@Request() req, @Param('id') id: string): Promise<void> {
+        return this.groupsService.addUser(id, req.user.sub);
+    }
+
+    @UseGuards(AuthGuard)
     @Put(':id')
     async updateGroup(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto): Promise<void> {
         return this.groupsService.update(id, updateGroupDto);

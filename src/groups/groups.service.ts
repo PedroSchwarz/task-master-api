@@ -4,10 +4,16 @@ import { Group, GroupDocument } from './schemas/group.schema';
 import { Model } from 'mongoose';
 import CreateGroupDto from './dto/create_group.dto';
 import UpdateGroupDto from './dto/update_group.dto';
+import { TasksService } from 'src/tasks/tasks.service';
+import { InvitesService } from 'src/invites/invites.service';
 
 @Injectable()
 export class GroupsService {
-    constructor(@InjectModel(Group.name) private groupModel: Model<Group>) { }
+    constructor(
+        @InjectModel(Group.name) private groupModel: Model<Group>,
+        private readonly tasksService: TasksService,
+        private readonly invitesService: InvitesService
+    ) { }
 
     async getAll(): Promise<GroupDocument[]> {
         return this.groupModel.find({}).exec();
@@ -47,11 +53,12 @@ export class GroupsService {
 
     async addUser(groupId: string, userId: string): Promise<void> {
         await this.groupModel.findByIdAndUpdate(groupId, { $push: { members: userId } }).exec();
-        return;
     }
 
     async delete(id: string): Promise<void> {
         await this.groupModel.findByIdAndDelete(id).exec();
+        await this.tasksService.deleteAllForGroup(id);
+        await this.invitesService.deleteAllForGroup(id);
     }
 
     async deleteAll(): Promise<void> {

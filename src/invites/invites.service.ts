@@ -3,11 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Invite, InviteDocument } from './schemas/invite.schema';
 import { Model } from 'mongoose';
 import CreateInviteDto from './dto/create_invite.dto';
-import { GroupsService } from 'src/groups/groups.service';
 
 @Injectable()
 export class InvitesService {
-    constructor(@InjectModel(Invite.name) private inviteModel: Model<Invite>, private readonly groupService: GroupsService) { }
+    constructor(@InjectModel(Invite.name) private inviteModel: Model<Invite>) { }
 
     async getAll(): Promise<InviteDocument[]> {
         return this.inviteModel.find({}).populate(['to', 'from', 'group']).exec();
@@ -29,22 +28,22 @@ export class InvitesService {
         }
         const createdGroup = new this.inviteModel(invite);
         await createdGroup.save();
-        return;
     }
 
-    async accept(userId: string, inviteId: string, groupId: string): Promise<void> {
-        await this.inviteModel.findByIdAndUpdate(inviteId, { status: 'accepted' }).exec();
-        await this.groupService.addUser(groupId, userId);
-        return;
+    async accept(id: string): Promise<void> {
+        await this.inviteModel.findByIdAndUpdate(id, { status: 'accepted' }).exec();
     }
 
-    async reject(inviteId: string, groupId: string): Promise<void> {
-        await this.inviteModel.findByIdAndUpdate(inviteId, { status: 'rejected' }).exec();
-        return;
+    async reject(id: string): Promise<void> {
+        await this.inviteModel.findByIdAndUpdate(id, { status: 'rejected' }).exec();
     }
 
     async delete(id: string): Promise<void> {
         await this.inviteModel.findByIdAndDelete(id).exec();
+    }
+
+    async deleteAllForGroup(groupId: string): Promise<void> {
+        await this.inviteModel.deleteMany({ group: groupId }).exec();
     }
 
     async deleteAll(): Promise<void> {

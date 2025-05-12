@@ -37,6 +37,10 @@ export class CommentsService {
         await this.commentModel.findByIdAndDelete(id).exec();
     }
 
+    async deleteAllForTask(taskId: string): Promise<void> {
+        await this.commentModel.deleteMany({ task: taskId }).exec();
+    }
+
     async deleteAll(): Promise<void> {
         await this.commentModel.deleteMany({}).exec();
     }

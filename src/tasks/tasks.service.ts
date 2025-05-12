@@ -4,10 +4,11 @@ import { Task, TaskDocument } from './schema/task.schema';
 import { Model } from 'mongoose';
 import CreateTaskDto from './dto/create_task.dto';
 import UpdateTaskDto from './dto/update_task.dto';
+import { CommentsService } from 'src/comments/comments.service';
 
 @Injectable()
 export class TasksService {
-    constructor(@InjectModel(Task.name) private taskModel: Model<Task>) { }
+    constructor(@InjectModel(Task.name) private taskModel: Model<Task>, private readonly commentsService: CommentsService) { }
 
     async getAllForGroup(groupId: string): Promise<TaskDocument[]> {
         return this.taskModel.find({ group: groupId }).populate(['owner', 'assignedTo']).exec();
@@ -45,13 +46,15 @@ export class TasksService {
         await this.taskModel.findByIdAndUpdate(id, task).exec();
     }
 
-    // async addUser(groupId: string, userId: string): Promise<void> {
-    //     await this.taskModel.findByIdAndUpdate(groupId, { $push: { members: userId } }).exec();
-    //     return;
-    // }
-
     async delete(id: string): Promise<void> {
         await this.taskModel.findByIdAndDelete(id).exec();
+        await this.commentsService.deleteAllForTask(id);
+    }
+
+    async deleteAllForGroup(groupId: string): Promise<void> {
+        const tasks = await this.getAllForGroup(groupId);
+        await this.taskModel.deleteMany({ group: groupId }).exec();
+        await Promise.all(tasks.map(task => this.commentsService.deleteAllForTask(task.id)));
     }
 
     async deleteAll(): Promise<void> {

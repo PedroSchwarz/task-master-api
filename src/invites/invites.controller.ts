@@ -27,15 +27,15 @@ export class InvitesController {
     }
 
     @UseGuards(AuthGuard)
-    @Put(':id/accept/:groupId')
-    async acceptInvite(@Request() req, @Param('id') inviteId, @Param('groupId') groupId): Promise<void> {
-        return this.invitesService.accept(req.user.sub, inviteId, groupId);
+    @Put(':id/accept')
+    async acceptInvite(@Param('id') id: string): Promise<void> {
+        return this.invitesService.accept(id);
     }
 
     @UseGuards(AuthGuard)
-    @Put(':id/reject/:groupId')
-    async rejectInvite(@Param('id') inviteId, @Param('groupId') groupId): Promise<void> {
-        return this.invitesService.reject(inviteId, groupId);
+    @Put(':id/reject')
+    async rejectInvite(@Param('id') id: string): Promise<void> {
+        return this.invitesService.reject(id);
     }
 
     @UseGuards(AuthGuard)
