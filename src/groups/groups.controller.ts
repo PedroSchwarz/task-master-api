@@ -1,8 +1,9 @@
-import { Controller, Get, UseGuards, Request, Body, Post, Delete, Param } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request, Body, Post, Delete, Param, Put } from '@nestjs/common';
 import { GroupsService } from './groups.service';
 import { GroupDocument } from './schemas/group.schema';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import CreateGroupDto from './dto/create_group.dto';
+import UpdateGroupDto from './dto/update_group.dto';
 
 @Controller('groups')
 export class GroupsController {
@@ -30,6 +31,12 @@ export class GroupsController {
     @Post()
     async create(@Request() req, @Body() createGroupDto: CreateGroupDto): Promise<string> {
         return this.groupsService.create(req.user.sub, createGroupDto);
+    }
+
+    @UseGuards(AuthGuard)
+    @Put(':id')
+    async updateGroup(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto): Promise<void> {
+        return this.groupsService.update(id, updateGroupDto);
     }
 
     @UseGuards(AuthGuard)
