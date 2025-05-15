@@ -4,9 +4,10 @@ import { TasksController } from './tasks.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Task, TaskSchema } from './schema/task.schema';
 import { CommentsModule } from 'src/comments/comments.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Task.name, schema: TaskSchema }]), CommentsModule],
+  imports: [MongooseModule.forFeature([{ name: Task.name, schema: TaskSchema }]), CommentsModule, NotificationModule],
   providers: [TasksService],
   controllers: [TasksController],
   exports: [TasksService],

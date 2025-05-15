@@ -31,6 +31,11 @@ export class UsersService {
         return foundUser;
     }
 
+    async updateDeviceToken(userId: string, token: string): Promise<void> {
+        await this.userModel.findByIdAndUpdate(userId, { deviceToken: token });
+        return;
+    }
+
     async create(registerDto: RegisterDto): Promise<UserDocument> {
         const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
