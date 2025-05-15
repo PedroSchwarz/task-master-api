@@ -5,10 +5,15 @@ import { Model } from 'mongoose';
 import CreateTaskDto from './dto/create_task.dto';
 import UpdateTaskDto from './dto/update_task.dto';
 import { CommentsService } from 'src/comments/comments.service';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class TasksService {
-    constructor(@InjectModel(Task.name) private taskModel: Model<Task>, private readonly commentsService: CommentsService) { }
+    constructor(
+        @InjectModel(Task.name) private taskModel: Model<Task>,
+        private readonly commentsService: CommentsService,
+        private readonly notificationService: NotificationService
+    ) { }
 
     async getAllForGroup(groupId: string): Promise<TaskDocument[]> {
         return this.taskModel.find({ group: groupId }).populate(['owner', 'assignedTo']).exec();
@@ -37,7 +42,17 @@ export class TasksService {
         };
 
         const createdTask = new this.taskModel(task);
-        await createdTask.save();
+        const savedTask = await createdTask.save();
+
+        const assignees = createTaskDto.assignedTo;
+
+        if (!assignees || assignees.filter((assignee) => assignee != userId).length == 0) {
+            return;
+        }
+
+        for (let id of assignees.filter((assignee) => assignee != userId)) {
+            await this.notificationService.sendTaskAssignmentNotification(id, userId, savedTask.id, createTaskDto);
+        }
     }
 
     async update(id: string, updateTaskDto: UpdateTaskDto): Promise<void> {

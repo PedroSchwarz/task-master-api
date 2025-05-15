@@ -6,8 +6,24 @@ import { GroupsModule } from './groups/groups.module';
 import { InvitesModule } from './invites/invites.module';
 import { TasksModule } from './tasks/tasks.module';
 import { CommentsModule } from './comments/comments.module';
+import { FirebaseModule } from './firebase/firebase.module';
+import { NotificationService } from './notification/notification.service';
+import { NotificationModule } from './notification/notification.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [AuthModule, UsersModule, MongooseModule.forRoot('mongodb://admin:secret@localhost:27017/task-master?authSource=admin'), GroupsModule, InvitesModule, TasksModule, CommentsModule],
+  imports: [
+    ConfigModule.forRoot(),
+    AuthModule,
+    UsersModule,
+    MongooseModule.forRoot('mongodb://admin:secret@localhost:27017/task-master?authSource=admin'),
+    GroupsModule,
+    InvitesModule,
+    TasksModule,
+    CommentsModule,
+    FirebaseModule,
+    NotificationModule,
+  ],
+  providers: [NotificationService],
 })
 export class AppModule { }

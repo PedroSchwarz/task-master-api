@@ -1,7 +1,8 @@
-import { Controller, Get, Request, Param, UseGuards, Delete } from '@nestjs/common';
+import { Controller, Get, Request, Param, UseGuards, Delete, Put, Body, Post } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UserDocument } from './schemas/user.schema';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
+import UpdateTokenDto from './dto/update_token.dto';
 
 @Controller('users')
 export class UsersController {
@@ -23,6 +24,12 @@ export class UsersController {
     @Get(':id')
     async getById(@Param('id') id: string): Promise<UserDocument> {
         return this.usersService.findOneById(id);
+    }
+
+    @UseGuards(AuthGuard)
+    @Post('device-token')
+    async updateDeviceToken(@Request() req, @Body() updateTokenDto: UpdateTokenDto): Promise<void> {
+        return this.usersService.updateDeviceToken(req.user.sub, updateTokenDto.token);
     }
 
     @UseGuards(AuthGuard)
