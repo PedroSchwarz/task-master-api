@@ -10,6 +10,7 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { NotificationService } from './notification/notification.service';
 import { NotificationModule } from './notification/notification.module';
 import { ConfigModule } from '@nestjs/config';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ConfigModule } from '@nestjs/config';
     CommentsModule,
     FirebaseModule,
     NotificationModule,
+    EventsModule
   ],
   providers: [NotificationService],
 })
