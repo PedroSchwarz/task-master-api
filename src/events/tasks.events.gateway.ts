@@ -21,7 +21,7 @@ export class TasksEventsGateway {
         if (!task) {
             return;
         }
-        const group = await this.groupsService.getById(task.group.toString());
+        const group = await this.groupsService.getById(userId, task.group.toString());
 
         if (!group) {
             return;

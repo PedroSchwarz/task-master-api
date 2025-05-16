@@ -23,8 +23,8 @@ export class GroupsService {
         return this.groupModel.find({ members: userId }).populate(['members', 'owner']).exec();
     }
 
-    async getById(id: string): Promise<GroupDocument> {
-        const group = await this.groupModel.findById(id).populate(['members', 'owner']).exec();
+    async getById(userId: string, id: string): Promise<GroupDocument> {
+        const group = await this.groupModel.findOne({ _id: id, members: userId }).populate(['members', 'owner']).exec();
 
         if (!group) {
             throw new NotFoundException();
