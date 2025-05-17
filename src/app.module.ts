@@ -9,15 +9,23 @@ import { CommentsModule } from './comments/comments.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { NotificationService } from './notification/notification.service';
 import { NotificationModule } from './notification/notification.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     AuthModule,
     UsersModule,
-    MongooseModule.forRoot('mongodb://admin:secret@localhost:27017/task-master?authSource=admin'),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule], inject: [ConfigService], useFactory: (config: ConfigService) => {
+        const url = config.get<string>('DATABASE_URL') ?? '';
+        const name = config.get<string>('DATABASE_NAME') ?? '';
+        const user = config.get<string>('DATABASE_USER') ?? '';
+        const password = config.get<string>('DATABASE_PASSWORD') ?? '';
+        return { uri: `mongodb+srv://${user}:${password}@${url}/?retryWrites=true&w=majority&appName=${name}` };
+      }
+    }),
     GroupsModule,
     InvitesModule,
     TasksModule,

@@ -22,7 +22,7 @@ export class NotificationService {
         try {
             const assignedUser = await this.usersService.findOneById(memberId);
 
-            if (!assignedUser || !assignedUser.deviceToken) {
+            if (!assignedUser || !assignedUser.deviceToken || assignedUser.deviceToken === '') {
                 this.logger.warn(`No device token found for user ${assignedUser.id} - ${assignedUser.email}`);
                 return false;
             }

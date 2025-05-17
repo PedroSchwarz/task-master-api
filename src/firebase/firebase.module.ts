@@ -1,8 +1,6 @@
 import { Global, Module, OnModuleInit } from '@nestjs/common';
 import { FirebaseService } from './firebase.service';
 import * as admin from 'firebase-admin';
-import * as path from 'path';
-import * as fs from 'fs';
 
 @Global()
 @Module({
