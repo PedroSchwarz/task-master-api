@@ -29,7 +29,7 @@ export class TasksService {
         return task;
     }
 
-    async create(userId: string, createTaskDto: CreateTaskDto): Promise<void> {
+    async create(userId: string, createTaskDto: CreateTaskDto): Promise<string> {
         const task = {
             title: createTaskDto.title,
             description: createTaskDto.description,
@@ -47,12 +47,14 @@ export class TasksService {
         const assignees = createTaskDto.assignedTo;
 
         if (!assignees || assignees.filter((assignee) => assignee != userId).length == 0) {
-            return;
+            return savedTask.id;
         }
 
         for (let id of assignees.filter((assignee) => assignee != userId)) {
             await this.notificationService.sendTaskAssignmentNotification(id, userId, savedTask.id, createTaskDto);
         }
+
+        return savedTask.id;
     }
 
     async update(id: string, updateTaskDto: UpdateTaskDto): Promise<void> {

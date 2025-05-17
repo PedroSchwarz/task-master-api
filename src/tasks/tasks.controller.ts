@@ -23,7 +23,7 @@ export class TasksController {
 
     @UseGuards(AuthGuard)
     @Post()
-    async createTask(@Request() req, @Body() createTaskDto: CreateTaskDto): Promise<void> {
+    async createTask(@Request() req, @Body() createTaskDto: CreateTaskDto): Promise<string> {
         return this.tasksService.create(req.user.sub, createTaskDto);
     }
 
