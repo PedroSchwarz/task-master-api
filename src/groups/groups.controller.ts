@@ -23,8 +23,8 @@ export class GroupsController {
 
     @UseGuards(AuthGuard)
     @Get(':id')
-    async getById(@Param('id') id: string): Promise<GroupDocument> {
-        return this.groupsService.getById(id);
+    async getById(@Request() req, @Param('id') id: string): Promise<GroupDocument> {
+        return this.groupsService.getById(req.user.sub, id);
     }
 
     @UseGuards(AuthGuard)

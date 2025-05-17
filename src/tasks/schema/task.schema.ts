@@ -25,8 +25,8 @@ export class Task {
     @Prop({ default: false })
     completed: boolean;
 
-    @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'Group' })
-    group: Group;
+    @Prop({ required: true })
+    group: mongoose.Schema.Types.ObjectId;
 
     @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
     owner: User;
