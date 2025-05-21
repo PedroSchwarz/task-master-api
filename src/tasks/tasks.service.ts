@@ -19,6 +19,14 @@ export class TasksService {
         return this.taskModel.find({ group: groupId }).populate(['owner', 'assignedTo']).exec();
     }
 
+    async getAllForAssigned(userId: string): Promise<TaskDocument[]> {
+        return this.taskModel.find({ assignedTo: userId }).exec();
+    }
+
+    async getAllForOwner(userId: string): Promise<TaskDocument[]> {
+        return this.taskModel.find({ owner: userId }).exec();
+    }
+
     async getById(id: string): Promise<TaskDocument> {
         const task = await this.taskModel.findById(id).populate(['owner', 'assignedTo']).exec();
 
