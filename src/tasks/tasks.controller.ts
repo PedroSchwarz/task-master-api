@@ -16,18 +16,6 @@ export class TasksController {
     }
 
     @UseGuards(AuthGuard)
-    @Get('/user/assigned')
-    async getAllForAssignedUser(@Request() req): Promise<TaskDocument[]> {
-        return this.tasksService.getAllForAssigned(req.user.sub);
-    }
-
-    @UseGuards(AuthGuard)
-    @Get('/user/owner')
-    async getAllForOwner(@Request() req): Promise<TaskDocument[]> {
-        return this.tasksService.getAllForOwner(req.user.sub);
-    }
-
-    @UseGuards(AuthGuard)
     @Get(':id')
     async getTaskById(@Param('id') id: string): Promise<TaskDocument> {
         return this.tasksService.getById(id);
