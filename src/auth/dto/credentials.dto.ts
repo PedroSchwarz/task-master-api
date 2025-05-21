@@ -4,6 +4,7 @@ type CredentialsDto = {
     firstName: string,
     lastName: string,
     email: string,
+    createdAt: Date
 };
 
 export default CredentialsDto;

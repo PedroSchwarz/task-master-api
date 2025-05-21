@@ -23,7 +23,7 @@ export class AuthService {
             throw new HttpException('Something went wrong', 400);
         }
 
-        return this.getUserCredentials(createdUser.id, createdUser.firstName, createdUser.lastName, createdUser.email);
+        return this.getUserCredentials(createdUser.id, createdUser.firstName, createdUser.lastName, createdUser.email, createdUser.createdAt ?? new Date());
     }
 
     async login(loginDto: LoginDto): Promise<CredentialsDto> {
@@ -39,10 +39,10 @@ export class AuthService {
             throw new UnauthorizedException();
         }
 
-        return this.getUserCredentials(user.id, user.firstName, user.lastName, user.email);
+        return this.getUserCredentials(user.id, user.firstName, user.lastName, user.email, user.createdAt ?? new Date());
     }
 
-    async getUserCredentials(id: string, firstName: string, lastName: string, email: string): Promise<CredentialsDto> {
+    async getUserCredentials(id: string, firstName: string, lastName: string, email: string, createdAt: Date): Promise<CredentialsDto> {
         const payload = { sub: id, username: email };
 
         return {
@@ -51,6 +51,7 @@ export class AuthService {
             firstName,
             lastName,
             email,
+            createdAt
         };
     }
 }
