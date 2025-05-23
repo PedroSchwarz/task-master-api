@@ -11,10 +11,12 @@ import { NotificationService } from './notification/notification.service';
 import { NotificationModule } from './notification/notification.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventsModule } from './events/events.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     AuthModule,
     UsersModule,
     MongooseModule.forRootAsync({
@@ -32,7 +34,7 @@ import { EventsModule } from './events/events.module';
     CommentsModule,
     FirebaseModule,
     NotificationModule,
-    EventsModule
+    EventsModule,
   ],
   providers: [NotificationService],
 })
