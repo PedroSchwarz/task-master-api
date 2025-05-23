@@ -3,10 +3,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Invite, InviteDocument } from './schemas/invite.schema';
 import { Model } from 'mongoose';
 import CreateInviteDto from './dto/create_invite.dto';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class InvitesService {
-    constructor(@InjectModel(Invite.name) private inviteModel: Model<Invite>) { }
+    constructor(@InjectModel(Invite.name) private inviteModel: Model<Invite>, private readonly notificationService: NotificationService) { }
 
     async getAll(): Promise<InviteDocument[]> {
         return this.inviteModel.find({}).populate(['to', 'from', 'group']).exec();
@@ -26,8 +27,10 @@ export class InvitesService {
             to: createInviteDto.to,
             group: createInviteDto.groupId,
         }
-        const createdGroup = new this.inviteModel(invite);
-        await createdGroup.save();
+        const createdInvite = new this.inviteModel(invite);
+        const savedInvite = await createdInvite.save();
+
+        await this.notificationService.sendInviteNotification(createInviteDto.to, userId, savedInvite.id)
     }
 
     async accept(id: string): Promise<void> {
