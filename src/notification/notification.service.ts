@@ -53,4 +53,40 @@ export class NotificationService {
             return false;
         }
     }
+
+    async sendTaskExpiresSoonNotification(
+        memberId: string,
+        taskId: string,
+        taskTitle: string,
+        dueDate: Date,
+    ): Promise<boolean> {
+        try {
+            const assignedUser = await this.usersService.findOneById(memberId);
+
+            if (!assignedUser || !assignedUser.deviceToken || assignedUser.deviceToken === '') {
+                this.logger.warn(`No device token found for user ${assignedUser.id} - ${assignedUser.email}`);
+                return false;
+            }
+
+            const title = 'Task Expires Soon';
+            const formattedDueDate = format(dueDate, 'dd/MM/yyyy HH:mm');
+            const body = `Task ${taskTitle} will expire soon on the ${formattedDueDate}`;
+
+            const data = {
+                taskId: taskId,
+                type: 'TASK_EXPIRATION',
+                dueDate: dueDate ? String(dueDate) : '',
+            };
+
+            return await this.firebaseService.sendNotification(
+                assignedUser.deviceToken,
+                title,
+                body,
+                data,
+            );
+        } catch (error) {
+            this.logger.error(`Error sending task assignment notification: ${error.message}`, error.stack);
+            return false;
+        }
+    }
 }

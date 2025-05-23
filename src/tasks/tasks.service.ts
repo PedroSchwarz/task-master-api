@@ -27,6 +27,10 @@ export class TasksService {
         return this.taskModel.find({ owner: userId }).exec();
     }
 
+    async findTasksDueBetween(start: Date, end: Date): Promise<TaskDocument[]> {
+        return this.taskModel.find({ dueDate: { $gte: start, $lt: end }, completed: false }).exec();
+    }
+
     async getById(id: string): Promise<TaskDocument> {
         const task = await this.taskModel.findById(id).populate(['owner', 'assignedTo']).exec();
 
@@ -52,15 +56,19 @@ export class TasksService {
         const createdTask = new this.taskModel(task);
         const savedTask = await createdTask.save();
 
-        const assignees = createTaskDto.assignedTo;
+        const assignees = [...new Set(createTaskDto.assignedTo)];
 
         if (!assignees || assignees.filter((assignee) => assignee != userId).length == 0) {
             return savedTask.id;
         }
 
-        for (let id of assignees.filter((assignee) => assignee != userId)) {
-            await this.notificationService.sendTaskAssignmentNotification(id, userId, savedTask.id, createTaskDto);
-        }
+        await Promise.all(
+            assignees
+                .filter((assignee) => assignee !== userId)
+                .map((id) =>
+                    this.notificationService.sendTaskAssignmentNotification(id, userId, savedTask.id, createTaskDto)
+                )
+        );
 
         return savedTask.id;
     }
