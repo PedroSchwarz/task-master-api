@@ -35,11 +35,9 @@ export class NotificationService {
             const body = `${assignerName} assigned you task: ${taskDto.title} with a due date of: ${formattedDueDate}`;
 
             const data = {
-                taskId: taskId,
-                groupId: taskDto.group,
+                task_id: taskId,
+                group_id: taskDto.group,
                 type: 'TASK_ASSIGNMENT',
-                priority: taskDto.priority || 'low',
-                dueDate: taskDto.dueDate ? String(taskDto.dueDate) : '',
             };
 
             return await this.firebaseService.sendNotification(
@@ -73,10 +71,7 @@ export class NotificationService {
             const title = 'New Invite';
             const body = `${assignerName} invited you to a new group.`;
 
-            const data = {
-                inviteId: inviteId,
-                type: 'GROUP_INVITE',
-            };
+            const data = { type: 'GROUP_INVITE' };
 
             return await this.firebaseService.sendNotification(
                 assignedUser.deviceToken,
@@ -93,6 +88,7 @@ export class NotificationService {
     async sendTaskExpiresSoonNotification(
         memberId: string,
         taskId: string,
+        groupId: string,
         taskTitle: string,
         dueDate: Date,
     ): Promise<boolean> {
@@ -109,9 +105,9 @@ export class NotificationService {
             const body = `Task ${taskTitle} will expire soon on the ${formattedDueDate}`;
 
             const data = {
-                taskId: taskId,
+                task_id: taskId,
+                group_id: groupId,
                 type: 'TASK_EXPIRATION',
-                dueDate: dueDate ? String(dueDate) : '',
             };
 
             return await this.firebaseService.sendNotification(

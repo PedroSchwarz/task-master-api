@@ -26,10 +26,10 @@ export class TaskCheckerService {
                 return;
             }
 
-            await this.notificationService.sendTaskExpiresSoonNotification(task.owner.id, task.id, task.title, task.dueDate);
+            await this.notificationService.sendTaskExpiresSoonNotification(task.owner.id, task.id, task.group.toString(), task.title, task.dueDate);
 
             for (const user of task.assignedTo) {
-                await this.notificationService.sendTaskExpiresSoonNotification(user.id, task.id, task.title, task.dueDate);
+                await this.notificationService.sendTaskExpiresSoonNotification(user.id, task.id, task.group.toString(), task.title, task.dueDate);
             }
         }
     }
