@@ -40,6 +40,12 @@ export class GroupsController {
     }
 
     @UseGuards(AuthGuard)
+    @Post(':id/leave')
+    async leaveGroup(@Request() req, @Param('id') id: string): Promise<void> {
+        return this.groupsService.removeUser(id, req.user.sub);
+    }
+
+    @UseGuards(AuthGuard)
     @Put(':id')
     async updateGroup(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto): Promise<void> {
         return this.groupsService.update(id, updateGroupDto);

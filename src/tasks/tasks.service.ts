@@ -84,6 +84,16 @@ export class TasksService {
         await this.commentsService.deleteAllForTask(id);
     }
 
+    async deleteAllForUserOnGroup(groupId: string, userId: string): Promise<void> {
+        await this.taskModel.deleteMany({ group: groupId, owner: userId }).exec();
+
+        const tasks = await this.taskModel.find({ group: groupId, assignedTo: userId }).exec();
+
+        for (const task of tasks) {
+            await this.taskModel.findByIdAndUpdate(task.id, { $pull: { assignedTo: userId } }).exec();
+        }
+    }
+
     async deleteAllForGroup(groupId: string): Promise<void> {
         const tasks = await this.getAllForGroup(groupId);
         await this.taskModel.deleteMany({ group: groupId }).exec();

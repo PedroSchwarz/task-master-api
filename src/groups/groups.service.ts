@@ -55,6 +55,11 @@ export class GroupsService {
         await this.groupModel.findByIdAndUpdate(groupId, { $push: { members: userId } }).exec();
     }
 
+    async removeUser(groupId: string, userId: string): Promise<void> {
+        await this.groupModel.findByIdAndUpdate(groupId, { $pull: { members: userId } }).exec();
+        await this.tasksService.deleteAllForUserOnGroup(groupId, userId);
+    }
+
     async delete(id: string): Promise<void> {
         await this.groupModel.findByIdAndDelete(id).exec();
         await this.tasksService.deleteAllForGroup(id);
