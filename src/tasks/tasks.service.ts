@@ -27,6 +27,41 @@ export class TasksService {
         return this.taskModel.find({ owner: userId }).exec();
     }
 
+    async getTasksClosestToOverdue(userId: string): Promise<TaskDocument[]> {
+        const now = new Date();
+
+        return this.taskModel
+            .find({
+                assignedTo: userId,
+                completed: false,
+                dueDate: { $gte: now }
+            })
+            .sort({ dueDate: 1 })
+            .limit(5)
+            .populate(['owner', 'assignedTo'])
+            .exec();
+    }
+
+    async getRecentlyOverdueTasks(userId: string, daysBack: number = 7): Promise<TaskDocument[]> {
+        const now = new Date();
+        const cutoffDate = new Date();
+        cutoffDate.setDate(now.getDate() - daysBack);
+
+        return this.taskModel
+            .find({
+                assignedTo: userId,
+                completed: false,
+                dueDate: {
+                    $lt: now,
+                    $gte: cutoffDate
+                }
+            })
+            .sort({ dueDate: -1 })
+            .limit(5)
+            .populate(['owner', 'assignedTo'])
+            .exec();
+    }
+
     async findTasksDueBetween(start: Date, end: Date): Promise<TaskDocument[]> {
         return this.taskModel.find({ dueDate: { $gte: start, $lt: end }, completed: false }).exec();
     }

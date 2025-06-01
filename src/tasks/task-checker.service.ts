@@ -17,7 +17,7 @@ export class TaskCheckerService {
     @Cron('0 0 * * *')
     async handleCron() {
         const now = dayjs();
-        const tomorrow = now.add(1, 'day');
+        const tomorrow = now;
 
         const upcomingTasks = await this.tasksService.findTasksDueBetween(now.toDate(), tomorrow.toDate());
 

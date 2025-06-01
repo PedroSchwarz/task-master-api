@@ -22,6 +22,18 @@ export class TasksController {
     }
 
     @UseGuards(AuthGuard)
+    @Get('/upcoming')
+    async getTasksClosestToOverdue(@Request() req): Promise<TaskDocument[]> {
+        return this.tasksService.getTasksClosestToOverdue(req.user.sub);
+    }
+
+    @UseGuards(AuthGuard)
+    @Get('/overdue')
+    async getRecentlyOverdueTasks(@Request() req): Promise<TaskDocument[]> {
+        return this.tasksService.getRecentlyOverdueTasks(req.user.sub);
+    }
+
+    @UseGuards(AuthGuard)
     @Get('/user/owner')
     async getAllForOwner(@Request() req): Promise<TaskDocument[]> {
         return this.tasksService.getAllForOwner(req.user.sub);
