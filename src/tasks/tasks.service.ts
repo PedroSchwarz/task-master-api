@@ -86,6 +86,7 @@ export class TasksService {
             group: createTaskDto.group,
             owner: userId,
             assignedTo: createTaskDto.assignedTo,
+            checklist: createTaskDto.checklist
         };
 
         const createdTask = new this.taskModel(task);

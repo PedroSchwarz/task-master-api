@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { UserDocument } from 'src/users/schemas/user.schema';
+import { ChecklistItem, ChecklistItemSchema } from './checklist-item.schema';
 
 export type TaskDocument = HydratedDocument<Task>;
 
@@ -32,6 +33,9 @@ export class Task {
 
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], default: [] })
     assignedTo: UserDocument[];
+
+    @Prop({ type: [ChecklistItemSchema], default: [] })
+    checklist: ChecklistItem[];
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);
