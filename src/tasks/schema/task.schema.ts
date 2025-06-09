@@ -36,6 +36,15 @@ export class Task {
 
     @Prop({ type: [ChecklistItemSchema], default: [] })
     checklist: ChecklistItem[];
+
+    @Prop({ default: false })
+    recurring: boolean;
+
+    @Prop({ enum: ['daily', 'weekly', 'monthly'], default: null })
+    recurrencePattern?: 'daily' | 'weekly' | 'monthly';
+
+    @Prop()
+    recurrenceEndDate?: Date;
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);

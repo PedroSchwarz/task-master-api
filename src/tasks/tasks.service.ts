@@ -62,8 +62,21 @@ export class TasksService {
             .exec();
     }
 
+    async getRecurringTasksByDate(date: Date): Promise<TaskDocument[]> {
+        const start = new Date(date);
+        start.setHours(0, 0, 0, 0);
+
+        const end = new Date(date);
+        end.setHours(23, 59, 59, 999);
+
+        return this.taskModel.find({
+            recurring: true,
+            dueDate: { $gte: start, $lte: end },
+        }).exec();
+    }
+
     async findTasksDueBetween(start: Date, end: Date): Promise<TaskDocument[]> {
-        return this.taskModel.find({ dueDate: { $gte: start, $lt: end }, completed: false }).exec();
+        return this.taskModel.find({ dueDate: { $gte: start, $lte: end }, completed: false }).exec();
     }
 
     async getById(id: string): Promise<TaskDocument> {
@@ -78,15 +91,8 @@ export class TasksService {
 
     async create(userId: string, createTaskDto: CreateTaskDto): Promise<string> {
         const task = {
-            title: createTaskDto.title,
-            description: createTaskDto.description,
-            priority: createTaskDto.priority,
-            status: createTaskDto.status,
-            dueDate: createTaskDto.dueDate,
-            group: createTaskDto.group,
+            ...createTaskDto,
             owner: userId,
-            assignedTo: createTaskDto.assignedTo,
-            checklist: createTaskDto.checklist
         };
 
         const createdTask = new this.taskModel(task);

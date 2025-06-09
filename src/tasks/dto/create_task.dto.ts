@@ -7,6 +7,9 @@ type CreateTaskDto = {
     group: string;
     assignedTo?: string[];
     checklist?: ChecklistItemDto[];
+    recurring: boolean;
+    recurrencePattern?: string;
+    recurrenceEndDate?: Date;
 };
 
 type ChecklistItemDto = {
