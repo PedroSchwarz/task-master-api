@@ -15,6 +15,9 @@ export class Group {
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], default: [] })
     members: UserDocument[];
 
+    @Prop()
+    bannerImage?: string;
+
     @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
     owner: UserDocument;
 }
