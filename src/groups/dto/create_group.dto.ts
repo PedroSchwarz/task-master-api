@@ -1,7 +1,7 @@
 type CreateGroupDto = {
     name: string;
     description?: string;
-    bannerImage?: string;
+    color?: number;
 };
 
 export default CreateGroupDto;

@@ -1,7 +1,7 @@
 type UpdateGroupDto = {
     name: string;
     description?: string;
-    bannerImage?: string;
+    color?: number;
     members: string[];
 };
 

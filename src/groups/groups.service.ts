@@ -37,7 +37,7 @@ export class GroupsService {
         const group = {
             name: createGroupDto.name,
             description: createGroupDto.description,
-            bannerImage: createGroupDto.bannerImage,
+            color: createGroupDto.color,
             owner: userId,
             members: [userId],
         }

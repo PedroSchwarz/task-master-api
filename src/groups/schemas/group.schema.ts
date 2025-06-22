@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { User, UserDocument } from 'src/users/schemas/user.schema';
+import { UserDocument } from 'src/users/schemas/user.schema';
 
 export type GroupDocument = HydratedDocument<Group>;
 
@@ -15,8 +15,8 @@ export class Group {
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], default: [] })
     members: UserDocument[];
 
-    @Prop()
-    bannerImage?: string;
+    @Prop({ default: null })
+    color?: number;
 
     @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
     owner: UserDocument;
