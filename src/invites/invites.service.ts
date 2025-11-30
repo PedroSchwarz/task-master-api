@@ -33,14 +33,6 @@ export class InvitesService {
         await this.notificationService.sendInviteNotification(createInviteDto.to, userId, savedInvite.id)
     }
 
-    async accept(id: string): Promise<void> {
-        await this.inviteModel.findByIdAndUpdate(id, { status: 'accepted' }).exec();
-    }
-
-    async reject(id: string): Promise<void> {
-        await this.inviteModel.findByIdAndUpdate(id, { status: 'rejected' }).exec();
-    }
-
     async delete(id: string): Promise<void> {
         await this.inviteModel.findByIdAndDelete(id).exec();
     }

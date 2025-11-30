@@ -27,18 +27,6 @@ export class InvitesController {
     }
 
     @UseGuards(AuthGuard)
-    @Put(':id/accept')
-    async acceptInvite(@Param('id') id: string): Promise<void> {
-        return this.invitesService.accept(id);
-    }
-
-    @UseGuards(AuthGuard)
-    @Put(':id/reject')
-    async rejectInvite(@Param('id') id: string): Promise<void> {
-        return this.invitesService.reject(id);
-    }
-
-    @UseGuards(AuthGuard)
     @Delete(':id')
     async delete(@Param('id') id: string): Promise<void> {
         return this.invitesService.delete(id);
