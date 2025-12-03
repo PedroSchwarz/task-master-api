@@ -6,7 +6,7 @@ import CreateTaskDto from './dto/create_task.dto';
 import UpdateTaskDto from './dto/update_task.dto';
 import { CommentsService } from 'src/comments/comments.service';
 import { NotificationService } from 'src/notification/notification.service';
-import dayjs from 'dayjs';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class TasksService {
