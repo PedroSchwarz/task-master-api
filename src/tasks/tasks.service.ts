@@ -6,6 +6,7 @@ import CreateTaskDto from './dto/create_task.dto';
 import UpdateTaskDto from './dto/update_task.dto';
 import { CommentsService } from 'src/comments/comments.service';
 import { NotificationService } from 'src/notification/notification.service';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class TasksService {
@@ -63,11 +64,10 @@ export class TasksService {
     }
 
     async getRecurringTasksByDate(date: Date): Promise<TaskDocument[]> {
-        const start = new Date(date);
-        start.setHours(0, 0, 0, 0);
-
-        const end = new Date(date);
-        end.setHours(23, 59, 59, 999);
+        // Use dayjs for timezone-safe date handling
+        const dateDayjs = dayjs(date);
+        const start = dateDayjs.startOf('day').toDate(); // Start of day (00:00:00.000)
+        const end = dateDayjs.endOf('day').toDate(); // End of day (23:59:59.999)
 
         return this.taskModel.find({
             recurring: true,

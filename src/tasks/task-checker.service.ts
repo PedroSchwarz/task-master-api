@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { TasksService } from './tasks.service';
 import * as dayjs from 'dayjs';
@@ -6,7 +6,7 @@ import { NotificationService } from 'src/notification/notification.service';
 import { Task } from './schema/task.schema';
 
 @Injectable()
-export class TaskCheckerService {
+export class TaskCheckerService implements OnModuleInit {
     private readonly logger = new Logger(TaskCheckerService.name);
 
     constructor(
@@ -14,65 +14,122 @@ export class TaskCheckerService {
         private readonly notificationService: NotificationService
     ) { }
 
-    // Runs every day at 00:00
+    onModuleInit() {
+        this.logger.log('TaskCheckerService initialized - Cron jobs are active');
+    }
+
+    // Runs every day at 00:00 UTC
     @Cron('0 0 * * *')
     async handleOverdueNotificationCron() {
-        const now = dayjs().toDate();
+        this.logger.log('Running handleOverdueNotificationCron');
+        const now = dayjs();
 
-        const end = new Date(now);
-        end.setHours(23, 59, 59, 999);
+        const start = now.startOf('day').toDate(); // Start of today (00:00:00.000)
+        const end = now.endOf('day').toDate(); // End of today (23:59:59.999)
 
-        const upcomingTasks = await this.tasksService.findTasksDueBetween(now, end);
+        const upcomingTasks = await this.tasksService.findTasksDueBetween(start, end);
+        this.logger.log(`Found ${upcomingTasks.length} tasks due today`);
 
         for (const task of upcomingTasks) {
             if (!task) {
-                return;
+                this.logger.warn('Skipping null task');
+                continue;
             }
 
-            await this.notificationService.sendTaskExpiresSoonNotification(task.owner.id, task.id, task.group.toString(), task.title, task.dueDate);
+            try {
+                await this.notificationService.sendTaskExpiresSoonNotification(task.owner.id, task.id, task.group.toString(), task.title, task.dueDate);
 
-            for (const user of task.assignedTo) {
-                await this.notificationService.sendTaskExpiresSoonNotification(user.id, task.id, task.group.toString(), task.title, task.dueDate);
+                for (const user of task.assignedTo) {
+                    await this.notificationService.sendTaskExpiresSoonNotification(user.id, task.id, task.group.toString(), task.title, task.dueDate);
+                }
+            } catch (error) {
+                this.logger.error(`Error processing task ${task.id}: ${error.message}`, error.stack);
             }
         }
+        this.logger.log('Completed handleOverdueNotificationCron');
     }
 
-    // Runs every day at 00:00
+    // TEST: Runs every 2 minutes - Remove this after testing!
+    @Cron('*/2 * * * *')
+    async handleOverdueNotificationCronTest() {
+        this.logger.log('Running handleOverdueNotificationCronTest (TEST MODE)');
+        const now = dayjs();
+
+        const start = now.startOf('day').toDate(); // Start of today (00:00:00.000)
+        const end = now.endOf('day').toDate(); // End of today (23:59:59.999)
+
+        const upcomingTasks = await this.tasksService.findTasksDueBetween(start, end);
+        this.logger.log(`Found ${upcomingTasks.length} tasks due today`);
+
+        for (const task of upcomingTasks) {
+            if (!task) {
+                this.logger.warn('Skipping null task');
+                continue;
+            }
+
+            try {
+                await this.notificationService.sendTaskExpiresSoonNotification(task.owner.id, task.id, task.group.toString(), task.title, task.dueDate);
+
+                for (const user of task.assignedTo) {
+                    await this.notificationService.sendTaskExpiresSoonNotification(user.id, task.id, task.group.toString(), task.title, task.dueDate);
+                }
+            } catch (error) {
+                this.logger.error(`Error processing task ${task.id}: ${error.message}`, error.stack);
+            }
+        }
+        this.logger.log('Completed handleOverdueNotificationCronTest (TEST MODE)');
+    }
+
+    // Runs every day at 00:00 UTC
     @Cron('0 0 * * *')
     async handleRecurringTasks() {
+        this.logger.log('Running handleRecurringTasks');
         const now = dayjs();
         const yesterday = now.subtract(1, 'day').toDate();
 
         const tasks = await this.tasksService.getRecurringTasksByDate(yesterday);
+        this.logger.log(`Found ${tasks.length} recurring tasks to process`);
 
         for (const task of tasks) {
-            if (this.shouldDuplicate(task)) {
-                const newDueDate = new Date(task.dueDate);
-                switch (task.recurrencePattern) {
-                    case 'daily':
-                        newDueDate.setDate(newDueDate.getDate() + 1);
-                        break;
-                    case 'weekly':
-                        newDueDate.setDate(newDueDate.getDate() + 7);
-                        break;
-                    case 'monthly':
-                        newDueDate.setMonth(newDueDate.getMonth() + 1);
-                        break;
-                }
+            if (!task) {
+                this.logger.warn('Skipping null task');
+                continue;
+            }
 
-                await this.tasksService.create(task.owner.toString(), {
-                    title: task.title,
-                    description: task.description,
-                    dueDate: newDueDate,
-                    checklist: task.checklist,
-                    group: task.group.toString(),
-                    assignedTo: task.assignedTo.map(id => id.toString()),
-                    recurring: task.recurring,
-                    recurrencePattern: task.recurrencePattern,
-                    recurrenceEndDate: task.recurrenceEndDate,
-                });
+            if (this.shouldDuplicate(task)) {
+                try {
+                    // Use dayjs for timezone-safe date calculations
+                    let newDueDate = dayjs(task.dueDate);
+                    switch (task.recurrencePattern) {
+                        case 'daily':
+                            newDueDate = newDueDate.add(1, 'day');
+                            break;
+                        case 'weekly':
+                            newDueDate = newDueDate.add(1, 'week');
+                            break;
+                        case 'monthly':
+                            newDueDate = newDueDate.add(1, 'month');
+                            break;
+                    }
+
+                    await this.tasksService.create(task.owner.toString(), {
+                        title: task.title,
+                        description: task.description,
+                        dueDate: newDueDate.toDate(),
+                        checklist: task.checklist,
+                        group: task.group.toString(),
+                        assignedTo: task.assignedTo.map(id => id.toString()),
+                        recurring: task.recurring,
+                        recurrencePattern: task.recurrencePattern,
+                        recurrenceEndDate: task.recurrenceEndDate,
+                    });
+                    this.logger.log(`Created recurring task: ${task.title}`);
+                } catch (error) {
+                    this.logger.error(`Error creating recurring task ${task.id}: ${error.message}`, error.stack);
+                }
             }
         }
+        this.logger.log('Completed handleRecurringTasks');
     }
 
     private shouldDuplicate(task: Task): boolean {
