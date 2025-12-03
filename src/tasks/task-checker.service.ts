@@ -75,9 +75,10 @@ export class TaskCheckerService implements OnModuleInit {
     @Cron('0 0 * * *')
     async handleRecurringTasks() {
         this.logger.log('Running handleRecurringTasks');
-        const now = dayjs().toDate();
+        const now = dayjs();
+        const yesterday = now.subtract(1, 'day').toDate();
 
-        const tasks = await this.tasksService.getRecurringTasksByDate(now);
+        const tasks = await this.tasksService.getRecurringTasksByDate(yesterday);
         this.logger.log(`Found ${tasks.length} recurring tasks to process`);
 
         for (const task of tasks) {
@@ -146,6 +147,84 @@ export class TaskCheckerService implements OnModuleInit {
         }
         this.logger.log('Completed handleRecurringTasks');
     }
+
+    // Runs every two minutes
+    @Cron('*/2 * * * *')
+    async handleRecurringTasksTest() {
+        this.logger.log('Running handleRecurringTasks');
+        const now = dayjs();
+        const yesterday = now.subtract(1, 'day').toDate();
+
+        const tasks = await this.tasksService.getRecurringTasksByDate(yesterday);
+        this.logger.log(`Found ${tasks.length} recurring tasks to process`);
+
+        for (const task of tasks) {
+            if (!task) {
+                this.logger.warn('Skipping null task');
+                continue;
+            }
+
+            if (this.shouldDuplicate(task)) {
+                try {
+                    // Use dayjs for timezone-safe date calculations
+                    let newDueDate = dayjs(task.dueDate);
+                    switch (task.recurrencePattern) {
+                        case 'daily':
+                            newDueDate = newDueDate.add(1, 'day');
+                            break;
+                        case 'weekly':
+                            newDueDate = newDueDate.add(1, 'week');
+                            break;
+                        case 'monthly':
+                            newDueDate = newDueDate.add(1, 'month');
+                            break;
+                    }
+
+                    // Extract owner and assignedTo IDs (they're ObjectIds, not populated)
+                    const ownerId = task.owner.toString();
+                    const assignedToIds = task.assignedTo.map(id => id.toString());
+
+                    await this.tasksService.create(ownerId, {
+                        title: task.title,
+                        description: task.description,
+                        priority: task.priority,
+                        status: task.status,
+                        dueDate: newDueDate.toDate(),
+                        group: task.group.toString(),
+                        assignedTo: assignedToIds,
+                        checklist: task.checklist,
+                        recurring: task.recurring,
+                        recurrencePattern: task.recurrencePattern,
+                        recurrenceEndDate: task.recurrenceEndDate,
+                    });
+                    this.logger.log(`Created recurring task: ${task.title}`);
+                } catch (error) {
+                    this.logger.error(`Error creating recurring task ${task.id}: ${error.message}`, error.stack);
+                }
+            } else {
+                // Recurrence has ended - stop the recurring task
+                // Extract assignedTo IDs (they're ObjectIds, not populated)
+                const assignedToIds = task.assignedTo.map(id => id.toString());
+
+                await this.tasksService.update(task.id.toString(), {
+                    title: task.title,
+                    description: task.description,
+                    priority: task.priority,
+                    status: task.status,
+                    dueDate: task.dueDate,
+                    completed: task.completed,
+                    assignedTo: assignedToIds,
+                    checklist: task.checklist,
+                    recurring: false,
+                    recurrencePattern: undefined,
+                    recurrenceEndDate: undefined,
+                });
+                this.logger.log(`Stopping recurring task: ${task.title} (recurrence ended)`);
+            }
+        }
+        this.logger.log('Completed handleRecurringTasks');
+    }
+
 
     private shouldDuplicate(task: Task): boolean {
         const now = dayjs();

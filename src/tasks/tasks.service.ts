@@ -6,6 +6,7 @@ import CreateTaskDto from './dto/create_task.dto';
 import UpdateTaskDto from './dto/update_task.dto';
 import { CommentsService } from 'src/comments/comments.service';
 import { NotificationService } from 'src/notification/notification.service';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class TasksService {
@@ -67,19 +68,12 @@ export class TasksService {
     async getRecurringTasksByDate(date: Date): Promise<TaskDocument[]> {
         // Extract year, month, day from the input date
         // Query for tasks due on this exact calendar day in UTC
-        const inputDate = new Date(date);
-        const year = inputDate.getUTCFullYear();
-        const month = inputDate.getUTCMonth();
-        const day = inputDate.getUTCDate();
-
-        // Start of query day in UTC (00:00:00.000)
-        const start = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
-        const end = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
+        const start = dayjs(date).startOf('day').add(3, 'hours').toDate();
+        const end = dayjs(date).endOf('day').add(3, 'hours').toDate();
 
         this.logger.log(`Start: ${start}, End: ${end}`);
 
         // Query for recurring tasks due on this date
-
         return this.taskModel
             .find({
                 recurring: true,
