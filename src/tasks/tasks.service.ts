@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Task, TaskDocument } from './schema/task.schema';
 import { Model } from 'mongoose';
@@ -10,6 +10,8 @@ import * as dayjs from 'dayjs';
 
 @Injectable()
 export class TasksService {
+    private readonly logger = new Logger(TasksService.name);
+
     constructor(
         @InjectModel(Task.name) private taskModel: Model<Task>,
         private readonly commentsService: CommentsService,
@@ -75,6 +77,8 @@ export class TasksService {
         const start = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
         // Start of next day in UTC (exclusive)
         const end = new Date(Date.UTC(year, month, day + 1, 0, 0, 0, 0));
+
+        this.logger.log(`Start: ${start}, End: ${end}`);
 
         // Query for recurring tasks due on this date
         // Exclude tasks created in the last 2 hours to avoid duplicating tasks that were just created
