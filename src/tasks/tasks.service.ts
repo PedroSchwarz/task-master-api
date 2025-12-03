@@ -81,16 +81,12 @@ export class TasksService {
         this.logger.log(`Start: ${start}, End: ${end}`);
 
         // Query for recurring tasks due on this date
-        // Exclude tasks created in the last 2 hours to avoid duplicating tasks that were just created
-        const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
 
         return this.taskModel
             .find({
                 recurring: true,
                 dueDate: { $gte: start, $lt: end },
-                createdAt: { $lt: twoHoursAgo }, // Only get tasks created more than 2 hours ago
             })
-            .populate(['owner', 'assignedTo'])
             .exec();
     }
 

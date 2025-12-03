@@ -103,13 +103,17 @@ export class TaskCheckerService implements OnModuleInit {
                             break;
                     }
 
-                    await this.tasksService.create(task.owner.toString(), {
+                    // Extract owner and assignedTo IDs (they're ObjectIds, not populated)
+                    const ownerId = task.owner.toString();
+                    const assignedToIds = task.assignedTo.map(id => id.toString());
+
+                    await this.tasksService.create(ownerId, {
                         title: task.title,
                         description: task.description,
                         dueDate: newDueDate.toDate(),
                         checklist: task.checklist,
                         group: task.group.toString(),
-                        assignedTo: task.assignedTo.map(id => id.toString()),
+                        assignedTo: assignedToIds,
                         recurring: task.recurring,
                         recurrencePattern: task.recurrencePattern,
                         recurrenceEndDate: task.recurrenceEndDate,
@@ -127,10 +131,9 @@ export class TaskCheckerService implements OnModuleInit {
     @Cron('0 0 * * *')
     async handleRecurringTasks() {
         this.logger.log('Running handleRecurringTasks');
-        const now = dayjs();
-        const yesterday = now.subtract(1, 'day').toDate();
+        const now = dayjs().toDate();
 
-        const tasks = await this.tasksService.getRecurringTasksByDate(yesterday);
+        const tasks = await this.tasksService.getRecurringTasksByDate(now);
         this.logger.log(`Found ${tasks.length} recurring tasks to process`);
 
         for (const task of tasks) {
@@ -155,13 +158,17 @@ export class TaskCheckerService implements OnModuleInit {
                             break;
                     }
 
-                    await this.tasksService.create(task.owner.toString(), {
+                    // Extract owner and assignedTo IDs (they're ObjectIds, not populated)
+                    const ownerId = task.owner.toString();
+                    const assignedToIds = task.assignedTo.map(id => id.toString());
+
+                    await this.tasksService.create(ownerId, {
                         title: task.title,
                         description: task.description,
                         dueDate: newDueDate.toDate(),
                         checklist: task.checklist,
                         group: task.group.toString(),
-                        assignedTo: task.assignedTo.map(id => id.toString()),
+                        assignedTo: assignedToIds,
                         recurring: task.recurring,
                         recurrencePattern: task.recurrencePattern,
                         recurrenceEndDate: task.recurrenceEndDate,
