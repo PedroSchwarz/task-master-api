@@ -64,15 +64,27 @@ export class TasksService {
     }
 
     async getRecurringTasksByDate(date: Date): Promise<TaskDocument[]> {
-        // Use dayjs for timezone-safe date handling
-        const dateDayjs = dayjs(date);
-        const start = dateDayjs.startOf('day').toDate(); // Start of day (00:00:00.000)
-        const end = dateDayjs.add(1, 'day').startOf('day').toDate(); // Start of next day (exclusive)
+        // Extract year, month, day from the input date
+        // Query for tasks due on this exact calendar day in UTC
+        const inputDate = new Date(date);
+        const year = inputDate.getUTCFullYear();
+        const month = inputDate.getUTCMonth();
+        const day = inputDate.getUTCDate();
+
+        // Start of query day in UTC (00:00:00.000)
+        const start = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
+        // Start of next day in UTC (exclusive)
+        const end = new Date(Date.UTC(year, month, day + 1, 0, 0, 0, 0));
+
+        // Query for recurring tasks due on this date
+        // Exclude tasks created in the last 2 hours to avoid duplicating tasks that were just created
+        const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
 
         return this.taskModel
             .find({
                 recurring: true,
                 dueDate: { $gte: start, $lt: end },
+                createdAt: { $lt: twoHoursAgo }, // Only get tasks created more than 2 hours ago
             })
             .populate(['owner', 'assignedTo'])
             .exec();
