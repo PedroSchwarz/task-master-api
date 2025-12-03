@@ -75,10 +75,9 @@ export class TaskCheckerService implements OnModuleInit {
     @Cron('*/2 * * * *')
     async handleOverdueNotificationCronTest() {
         this.logger.log('Running handleRecurringTasks (TEST)');
-        const now = dayjs();
-        const yesterday = now.subtract(1, 'day').toDate();
+        const now = dayjs().toDate();
 
-        const tasks = await this.tasksService.getRecurringTasksByDate(yesterday);
+        const tasks = await this.tasksService.getRecurringTasksByDate(now);
         this.logger.log(`Found ${tasks.length} recurring tasks to process`);
 
         for (const task of tasks) {
