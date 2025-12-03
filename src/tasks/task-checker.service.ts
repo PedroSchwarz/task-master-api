@@ -37,10 +37,32 @@ export class TaskCheckerService implements OnModuleInit {
             }
 
             try {
-                await this.notificationService.sendTaskExpiresSoonNotification(task.owner.id, task.id, task.group.toString(), task.title, task.dueDate);
+                // Ensure owner ID is converted to string (handles both populated and unpopulated cases)
+                const ownerId = typeof task.owner === 'object' && task.owner?.id
+                    ? task.owner.id.toString()
+                    : task.owner.toString();
+
+                await this.notificationService.sendTaskExpiresSoonNotification(
+                    ownerId,
+                    task.id.toString(),
+                    task.group.toString(),
+                    task.title,
+                    task.dueDate
+                );
 
                 for (const user of task.assignedTo) {
-                    await this.notificationService.sendTaskExpiresSoonNotification(user.id, task.id, task.group.toString(), task.title, task.dueDate);
+                    // Ensure user ID is converted to string (handles both populated and unpopulated cases)
+                    const userId = typeof user === 'object' && user?.id
+                        ? user.id.toString()
+                        : user.toString();
+
+                    await this.notificationService.sendTaskExpiresSoonNotification(
+                        userId,
+                        task.id.toString(),
+                        task.group.toString(),
+                        task.title,
+                        task.dueDate
+                    );
                 }
             } catch (error) {
                 this.logger.error(`Error processing task ${task.id}: ${error.message}`, error.stack);
@@ -68,10 +90,32 @@ export class TaskCheckerService implements OnModuleInit {
             }
 
             try {
-                await this.notificationService.sendTaskExpiresSoonNotification(task.owner.id, task.id, task.group.toString(), task.title, task.dueDate);
+                // Ensure owner ID is converted to string (handles both populated and unpopulated cases)
+                const ownerId = typeof task.owner === 'object' && task.owner?.id
+                    ? task.owner.id.toString()
+                    : task.owner.toString();
+
+                await this.notificationService.sendTaskExpiresSoonNotification(
+                    ownerId,
+                    task.id.toString(),
+                    task.group.toString(),
+                    task.title,
+                    task.dueDate
+                );
 
                 for (const user of task.assignedTo) {
-                    await this.notificationService.sendTaskExpiresSoonNotification(user.id, task.id, task.group.toString(), task.title, task.dueDate);
+                    // Ensure user ID is converted to string (handles both populated and unpopulated cases)
+                    const userId = typeof user === 'object' && user?.id
+                        ? user.id.toString()
+                        : user.toString();
+
+                    await this.notificationService.sendTaskExpiresSoonNotification(
+                        userId,
+                        task.id.toString(),
+                        task.group.toString(),
+                        task.title,
+                        task.dueDate
+                    );
                 }
             } catch (error) {
                 this.logger.error(`Error processing task ${task.id}: ${error.message}`, error.stack);

@@ -69,14 +69,20 @@ export class TasksService {
         const start = dateDayjs.startOf('day').toDate(); // Start of day (00:00:00.000)
         const end = dateDayjs.endOf('day').toDate(); // End of day (23:59:59.999)
 
-        return this.taskModel.find({
-            recurring: true,
-            dueDate: { $gte: start, $lte: end },
-        }).exec();
+        return this.taskModel
+            .find({
+                recurring: true,
+                dueDate: { $gte: start, $lte: end },
+            })
+            .populate(['owner', 'assignedTo'])
+            .exec();
     }
 
     async findTasksDueBetween(start: Date, end: Date): Promise<TaskDocument[]> {
-        return this.taskModel.find({ dueDate: { $gte: start, $lte: end }, completed: false }).exec();
+        return this.taskModel
+            .find({ dueDate: { $gte: start, $lte: end }, completed: false })
+            .populate(['owner', 'assignedTo'])
+            .exec();
     }
 
     async getById(id: string): Promise<TaskDocument> {
