@@ -74,54 +74,52 @@ export class TaskCheckerService implements OnModuleInit {
     // TEST: Runs every 2 minutes - Remove this after testing!
     @Cron('*/2 * * * *')
     async handleOverdueNotificationCronTest() {
-        this.logger.log('Running handleOverdueNotificationCronTest (TEST MODE)');
-        const now = dayjs();
+        this.logger.log('Running handleRecurringTasks (TEST)');
+        const now = dayjs().toDate();
 
-        const start = now.startOf('day').toDate(); // Start of today (00:00:00.000)
-        const end = now.endOf('day').toDate(); // End of today (23:59:59.999)
+        const tasks = await this.tasksService.getRecurringTasksByDate(now);
+        this.logger.log(`Found ${tasks.length} recurring tasks to process`);
 
-        const upcomingTasks = await this.tasksService.findTasksDueBetween(start, end);
-        this.logger.log(`Found ${upcomingTasks.length} tasks due today`);
-
-        for (const task of upcomingTasks) {
+        for (const task of tasks) {
             if (!task) {
                 this.logger.warn('Skipping null task');
                 continue;
             }
 
-            try {
-                // Ensure owner ID is converted to string (handles both populated and unpopulated cases)
-                const ownerId = typeof task.owner === 'object' && task.owner?.id
-                    ? task.owner.id.toString()
-                    : task.owner.toString();
+            if (this.shouldDuplicate(task)) {
+                try {
+                    // Use dayjs for timezone-safe date calculations
+                    let newDueDate = dayjs(task.dueDate);
+                    switch (task.recurrencePattern) {
+                        case 'daily':
+                            newDueDate = newDueDate.add(1, 'day');
+                            break;
+                        case 'weekly':
+                            newDueDate = newDueDate.add(1, 'week');
+                            break;
+                        case 'monthly':
+                            newDueDate = newDueDate.add(1, 'month');
+                            break;
+                    }
 
-                await this.notificationService.sendTaskExpiresSoonNotification(
-                    ownerId,
-                    task.id.toString(),
-                    task.group.toString(),
-                    task.title,
-                    task.dueDate
-                );
-
-                for (const user of task.assignedTo) {
-                    // Ensure user ID is converted to string (handles both populated and unpopulated cases)
-                    const userId = typeof user === 'object' && user?.id
-                        ? user.id.toString()
-                        : user.toString();
-
-                    await this.notificationService.sendTaskExpiresSoonNotification(
-                        userId,
-                        task.id.toString(),
-                        task.group.toString(),
-                        task.title,
-                        task.dueDate
-                    );
+                    await this.tasksService.create(task.owner.toString(), {
+                        title: task.title,
+                        description: task.description,
+                        dueDate: newDueDate.toDate(),
+                        checklist: task.checklist,
+                        group: task.group.toString(),
+                        assignedTo: task.assignedTo.map(id => id.toString()),
+                        recurring: task.recurring,
+                        recurrencePattern: task.recurrencePattern,
+                        recurrenceEndDate: task.recurrenceEndDate,
+                    });
+                    this.logger.log(`Created recurring task: ${task.title}`);
+                } catch (error) {
+                    this.logger.error(`Error creating recurring task ${task.id}: ${error.message}`, error.stack);
                 }
-            } catch (error) {
-                this.logger.error(`Error processing task ${task.id}: ${error.message}`, error.stack);
             }
         }
-        this.logger.log('Completed handleOverdueNotificationCronTest (TEST MODE)');
+        this.logger.log('Completed handleRecurringTasks');
     }
 
     // Runs every day at 00:00 UTC
