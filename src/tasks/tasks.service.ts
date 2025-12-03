@@ -67,12 +67,12 @@ export class TasksService {
         // Use dayjs for timezone-safe date handling
         const dateDayjs = dayjs(date);
         const start = dateDayjs.startOf('day').toDate(); // Start of day (00:00:00.000)
-        const end = dateDayjs.endOf('day').toDate(); // End of day (23:59:59.999)
+        const end = dateDayjs.add(1, 'day').startOf('day').toDate(); // Start of next day (exclusive)
 
         return this.taskModel
             .find({
                 recurring: true,
-                dueDate: { $gte: start, $lte: end },
+                dueDate: { $gte: start, $lt: end },
             })
             .populate(['owner', 'assignedTo'])
             .exec();
