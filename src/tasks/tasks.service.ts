@@ -75,8 +75,7 @@ export class TasksService {
 
         // Start of query day in UTC (00:00:00.000)
         const start = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
-        // Start of next day in UTC (exclusive)
-        const end = new Date(Date.UTC(year, month, day + 1, 0, 0, 0, 0));
+        const end = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
 
         this.logger.log(`Start: ${start}, End: ${end}`);
 
