@@ -24,8 +24,8 @@ export class TaskCheckerService implements OnModuleInit {
         this.logger.log('Running handleOverdueNotificationCron');
         const now = dayjs();
 
-        const start = now.startOf('day').toDate(); // Start of today (00:00:00.000)
-        const end = now.endOf('day').toDate(); // End of today (23:59:59.999)
+        const start = now.startOf('day').add(3, 'hours').toDate(); // Start of today (00:00:00.000)
+        const end = now.endOf('day').add(3, 'hours').toDate(); // End of today (23:59:59.999)
 
         const upcomingTasks = await this.tasksService.findTasksDueBetween(start, end);
         this.logger.log(`Found ${upcomingTasks.length} tasks due today`);
@@ -42,12 +42,14 @@ export class TaskCheckerService implements OnModuleInit {
                     ? task.owner.id.toString()
                     : task.owner.toString();
 
+                const localDueDate = dayjs(task.dueDate).subtract(3, 'hours').toDate();
+
                 await this.notificationService.sendTaskExpiresSoonNotification(
                     ownerId,
                     task.id.toString(),
                     task.group.toString(),
                     task.title,
-                    task.dueDate
+                    localDueDate
                 );
 
                 for (const user of task.assignedTo) {
@@ -61,7 +63,7 @@ export class TaskCheckerService implements OnModuleInit {
                         task.id.toString(),
                         task.group.toString(),
                         task.title,
-                        task.dueDate
+                        localDueDate
                     );
                 }
             } catch (error) {
