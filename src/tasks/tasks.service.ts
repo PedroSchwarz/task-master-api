@@ -126,7 +126,7 @@ export class TasksService {
     }
 
     async update(id: string, updateTaskDto: UpdateTaskDto): Promise<void> {
-        const task = { ...updateTaskDto };
+        const task = { ...updateTaskDto, status: updateTaskDto.completed ? 'done' : updateTaskDto.status };
 
         await this.taskModel.findByIdAndUpdate(id, task).exec();
     }
