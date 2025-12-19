@@ -1,6 +1,7 @@
 type CredentialsDto = {
     id: String,
     access_token: string,
+    refresh_token: string,
     firstName: string,
     lastName: string,
     email: string,

@@ -4,6 +4,7 @@ import RegisterDto from './dto/register.dto';
 import LoginDto from './dto/login.dto';
 import CredentialsDto from './dto/credentials.dto';
 import { AuthGuard } from './guards/auth.guard';
+import RefreshTokenDto from './dto/refresh-token.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -19,6 +20,19 @@ export class AuthController {
     @Post('login')
     async signIn(@Body() loginDto: LoginDto): Promise<CredentialsDto> {
         return await this.authService.login(loginDto);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Post('refresh-token')
+    async refresh(@Body() refreshTokenDto: RefreshTokenDto): Promise<CredentialsDto> {
+        return await this.authService.refreshAccessToken(refreshTokenDto);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Post('sign-out')
+    async signOut(@Body() refreshTokenDto: RefreshTokenDto): Promise<{ message: string }> {
+        await this.authService.revokeRefreshToken(refreshTokenDto.refresh_token);
+        return { message: 'Logged out successfully' };
     }
 
     @UseGuards(AuthGuard)

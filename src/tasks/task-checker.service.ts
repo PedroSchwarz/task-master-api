@@ -58,6 +58,8 @@ export class TaskCheckerService implements OnModuleInit {
                         ? user.id.toString()
                         : user.toString();
 
+                    if (userId === ownerId) { continue; } // Skip sending notification to the owner
+
                     await this.notificationService.sendTaskExpiresSoonNotification(
                         userId,
                         task.id.toString(),
